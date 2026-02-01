@@ -8,8 +8,9 @@
 - Spotify Developer Account
 
 ## Step 1: Clone Repository
+
 ```bash
-git clone https://github.com/yourusername/melodiary.git
+git clone https://github.com/JakubOchnik/melodiary.git
 cd melodiary
 ```
 
@@ -29,6 +30,7 @@ cd melodiary
 3. Note your AWS region
 
 ## Step 4: Backend Setup
+
 ```bash
 cd backend
 python -m venv venv
@@ -39,6 +41,7 @@ cp .env.example .env
 ```
 
 ## Step 5: Frontend Setup
+
 ```bash
 cd frontend
 npm install
