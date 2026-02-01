@@ -43,7 +43,9 @@ class ApiService {
         // Invalid or expired token
         if (error.response?.status === 401) {
           localStorage.removeItem('melodiary_token');
-          window.location.href = '/login';
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(error);
       }
@@ -133,7 +135,7 @@ class ApiService {
       playlistName: string,
       tracks: Track[]
     ): Promise<{ success: number; failed: number; playlistUrl: string }> => {
-      const response = await this.client.post(`/playlists/import/${targetPlatform}/import`, {
+      const response = await this.client.post(`/playlists/${targetPlatform}/import`, {
         playlistName,
         tracks,
       });
