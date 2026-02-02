@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Python 3.9+
+- Python 3.14+
 - AWS Account
 - Spotify Developer Account
 
