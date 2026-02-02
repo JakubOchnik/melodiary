@@ -20,7 +20,7 @@ cd melodiary
 2. Create a new app
 3. Note your Client ID and Client Secret
 4. Add redirect URIs:
-   - `http://localhost:5173/callback/spotify` (development)
+   - `http://127.0.0.1:5173/callback/spotify` (development - localhost is deprecated by spotify)
    - `https://melodiary.io/callback/spotify` (production)
 
 ## Step 3: AWS Setup
