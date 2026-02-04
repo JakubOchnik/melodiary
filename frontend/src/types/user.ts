@@ -5,6 +5,8 @@ export interface User {
   email: string;
   displayName: string;
   createdAt: string;
+  hasRealEmail: boolean; // New field
+  spotifyId?: string; // New field
   preferences: UserPreferences;
 }
 
@@ -22,6 +24,7 @@ export interface PlatformConnection {
   connectedAt?: string;
   displayName?: string;
   profileUrl?: string;
+  platformUserId?: string; // New field (Spotify ID, etc.)
 }
 
 export interface UserStats {
