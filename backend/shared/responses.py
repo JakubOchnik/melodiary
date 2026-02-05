@@ -9,6 +9,10 @@ STANDARD_CORS_HEADERS = {
 
 
 def get_standard_cors_headers():
+    """
+    Return CORS headers
+    Note: These are now redundant after using API Gateway CORS
+    """
     return STANDARD_CORS_HEADERS.copy()
 
 
@@ -16,7 +20,6 @@ def success_response(data, status_code=200):
     """Return a successful API response"""
     return create_response(
         status_code,
-        get_standard_cors_headers(),
         json.dumps(data) if not isinstance(data, str) else data,
     )
 
@@ -27,10 +30,11 @@ def error_response(message, status_code=400, details=None):
     if details:
         error_body["details"] = details
 
-    return create_response(
-        status_code, get_standard_cors_headers(), json.dumps(error_body)
-    )
+    return create_response(status_code, json.dumps(error_body))
 
 
-def create_response(status_code, headers, body):
-    return {"statusCode": status_code, "headers": headers, "body": body}
+def create_response(status_code, body, headers=None):
+    response = {"statusCode": status_code, "body": body}
+    if headers:
+        response["headers"] = headers
+    return response
