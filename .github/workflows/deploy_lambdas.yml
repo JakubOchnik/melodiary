@@ -1,0 +1,43 @@
+name: Deploy all AWS Lambda functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy_lambda.yml"
+
+permissions:
+  id-token: write # required for OIDC
+  contents: read
+
+jobs:
+  deploy-spotify-login-lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to AWS
+        uses: aws-actions/aws-lambda-deploy@v1.1.0
+        with:
+          function-name: melodiary-spotify-login
+          code-artifacts-dir: ./backend/lambda/auth
+          handler: spotify_login.lambda_handler
+          runtime: python3.14
+
+  deploy-spotify-login-callback-lambda:
+    uses: ./.github/workflows/deploy_lambda_with_dependencies.yml
+    with:
+      handler: spotify_callback.lambda_handler
+      requirements_path: lambda/auth/spotify_callback_requirements.txt
+      shared_modules_path: shared
+      lambda_code_path: lambda/auth/spotify_callback.py
+      function_name: melodiary-spotify-callback
+    secrets: inherit
