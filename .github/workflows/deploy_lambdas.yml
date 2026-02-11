@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "backend/**"
-      - ".github/workflows/deploy_lambda.yml"
+      - ".github/workflows/**"
 
 permissions:
   id-token: write # required for OIDC
@@ -40,4 +40,14 @@ jobs:
       shared_modules_path: shared
       lambda_code_path: lambda/auth/spotify_callback.py
       function_name: melodiary-spotify-callback
+    secrets: inherit
+
+  deploy-spotify-fetch-library-lambda:
+    uses: ./.github/workflows/deploy_lambda_with_dependencies.yml
+    with:
+      handler: fetch_library.lambda_handler
+      requirements_path: lambda/service/spotify/fetch_library_requirements.txt
+      shared_modules_path: shared
+      lambda_code_path: lambda/service/spotify/fetch_library.py
+      function_name: melodiary-spotify-fetch-library
     secrets: inherit
