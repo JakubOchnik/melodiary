@@ -46,4 +46,4 @@ Thumbs.db
 
 # Deployment
 *.zip
-lambda-package/
+lambda_package/
