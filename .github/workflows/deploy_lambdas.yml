@@ -49,5 +49,5 @@ jobs:
       requirements_path: lambda/service/spotify/fetch_library_requirements.txt
       shared_modules_path: shared
       lambda_code_path: lambda/service/spotify/fetch_library.py
-      function_name: melodiary-spotify-fetch-library
+      function_name: melodiary-fetch-spotify-library
     secrets: inherit
