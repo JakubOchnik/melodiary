@@ -225,6 +225,8 @@ def save_tracks(user_id, tracks):
                     "addedDate": track.get(
                         "addedDate", datetime.now(timezone.utc).isoformat()
                     ),
+                    "duration": track.get("duration"),
+                    "releaseYear": track.get("releaseYear"),
                     "isManual": track.get("isManual", False),
                 }
             )

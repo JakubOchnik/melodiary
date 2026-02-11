@@ -142,3 +142,79 @@ def is_token_expired(expires_at):
         return datetime.now(timezone.utc) >= expiry - timedelta(minutes=5)
     except:
         return True
+
+
+def parse_track(track):
+    """
+    Map Spotify track JSON to internal structure
+
+    Returns:
+        Processed track structure or None if failed
+    """
+    try:
+        artists = track.get("artists", [])
+        album = track.get("album", {})
+        return {
+            "trackId": f"spotify:{track['id']}",
+            "trackName": track.get("name", "Unknown"),
+            "artistName": ", ".join(artist.get("name", "") for artist in artists),
+            "albumName": album.get("name", "Unknown"),
+            "platform": "spotify",
+            "platformTrackId": track["id"],
+            "platformAlbumId": album.get("id"),
+            "platformArtistId": (artists[0].get("id") if artists else None),
+            "coverArtUrl": (
+                album.get("images", [{}])[0].get("url") if album.get("images") else None
+            ),
+            "addedDate": track.get("added_at", datetime.now(timezone.utc).isoformat()),
+            "isManual": False,
+            "duration": track.get("duration_ms"),
+            "releaseYear": (
+                album.get("release_date", "")[:4] if album.get("release_date") else None
+            ),
+        }
+    except (KeyError, IndexError) as fmt_error:
+        print(f"Skipping malformed track: {fmt_error}")
+    return None
+
+
+def get_user_saved_tracks(access_token, limit=50):
+    """
+    Get user saved tracks from Spotify
+
+    Args:
+        access_token: API access token
+        limit: Number of tracks per request (max 50)
+
+    Returns:
+        Tuple of (list of tracks, error message)
+    """
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    all_tracks = []
+    offset = 0
+
+    # TODO: Set up a maximum page count / track cap to avoid timeouts for huge libraries (thousands of songs)
+    try:
+        while True:
+            url = f"{SPOTIFY_API_BASE}/me/tracks?limit={limit}&offset={offset}"
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+
+            data = response.json()
+            items = data.get("items", [])
+
+            for item in items:
+                track = item.get("track")
+                if track:
+                    track["added_at"] = item.get("added_at", "")
+                    all_tracks.append(track)
+
+            if data.get("next") is None:
+                break
+
+            offset += limit
+            print(f"Fetched {len(all_tracks)} tracks so far...")
+        return all_tracks, None
+    except requests.exceptions.RequestException as e:
+        return [], f"Failed to get saved tracks: {str(e)}"
