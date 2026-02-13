@@ -1,11 +1,8 @@
 import jwt
-import os
 from datetime import datetime, timedelta, timezone
 
+from shared.config import get_secret
 
-JWT_SECRET = os.environ.get("JWT_SECRET")
-if not JWT_SECRET:
-    raise RuntimeError("JWT_SECRET env var must be set")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_DAYS = 30
 
@@ -31,7 +28,7 @@ def generate_jwt(user_id, email):
         "exp": datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS),
     }
 
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    token = jwt.encode(payload, get_secret("JWT_SECRET"), algorithm=JWT_ALGORITHM)
     return token
 
 
@@ -49,7 +46,7 @@ def verify_jwt(token):
         if token.startswith("Bearer "):
             token = token[BEARER_PREFIX_LEN:]
 
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, get_secret("JWT_SECRET"), algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         print("Token expired")

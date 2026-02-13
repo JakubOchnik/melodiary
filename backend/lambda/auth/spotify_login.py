@@ -1,6 +1,8 @@
-import json
 import os
 import urllib.parse
+
+from shared.config import get_secret
+from shared.responses import success_response, error_response
 
 
 def lambda_handler(event, context):
@@ -11,15 +13,11 @@ def lambda_handler(event, context):
         Authorization URL that frontend should redirect to
     """
 
-    client_id = os.environ.get("SPOTIFY_CLIENT_ID")
+    client_id = get_secret("SPOTIFY_CLIENT_ID")
     redirect_uri = os.environ.get("SPOTIFY_REDIRECT_URI")
 
     if not client_id or not redirect_uri:
-        return {
-            "statusCode": 500,
-            "headers": get_cors_headers(),
-            "body": json.dumps({"error": "Missing Spotify configuration"}),
-        }
+        return error_response("Missing Spotify configuration", 500)
 
     # Spotify OAuth scopes
     scopes = [
@@ -42,18 +40,4 @@ def lambda_handler(event, context):
         f"https://accounts.spotify.com/authorize?{urllib.parse.urlencode(auth_params)}"
     )
 
-    return {
-        "statusCode": 200,
-        "headers": get_cors_headers(),
-        "body": json.dumps({"authUrl": auth_url}),
-    }
-
-
-def get_cors_headers():
-    """Return CORS headers for API responses"""
-    return {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type,Authorization",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-    }
+    return success_response({"authUrl": auth_url})

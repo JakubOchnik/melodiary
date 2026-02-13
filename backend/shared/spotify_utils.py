@@ -3,6 +3,8 @@ import os
 import base64
 from datetime import datetime, timedelta, timezone
 
+from shared.config import get_secret
+
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
 
@@ -17,8 +19,8 @@ def exchange_code_for_tokens(code):
     Returns:
         Tuple of (tokens dict, error message)
     """
-    client_id = os.environ.get("SPOTIFY_CLIENT_ID")
-    client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET")
+    client_id = get_secret("SPOTIFY_CLIENT_ID")
+    client_secret = get_secret("SPOTIFY_CLIENT_SECRET")
     redirect_uri = os.environ.get("SPOTIFY_REDIRECT_URI")
 
     # Encode client credentials
@@ -68,8 +70,8 @@ def refresh_access_token(refresh_token):
     Returns:
         Tuple of (new tokens dict, error message)
     """
-    client_id = os.environ.get("SPOTIFY_CLIENT_ID")
-    client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET")
+    client_id = get_secret("SPOTIFY_CLIENT_ID")
+    client_secret = get_secret("SPOTIFY_CLIENT_SECRET")
 
     auth_str = f"{client_id}:{client_secret}"
     auth_bytes = auth_str.encode("utf-8")
