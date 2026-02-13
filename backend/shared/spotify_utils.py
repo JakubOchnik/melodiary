@@ -23,6 +23,9 @@ def exchange_code_for_tokens(code):
     client_secret = get_secret("SPOTIFY_CLIENT_SECRET")
     redirect_uri = os.environ.get("SPOTIFY_REDIRECT_URI")
 
+    if not client_id or not client_secret or not redirect_uri:
+        return {}, f"Failed to exchange code: missing configuration"
+
     # Encode client credentials
     auth_str = f"{client_id}:{client_secret}"
     auth_bytes = auth_str.encode("utf-8")
@@ -72,6 +75,9 @@ def refresh_access_token(refresh_token):
     """
     client_id = get_secret("SPOTIFY_CLIENT_ID")
     client_secret = get_secret("SPOTIFY_CLIENT_SECRET")
+
+    if not client_id or not client_secret:
+        return {}, f"Failed to refresh token: missing configuration"
 
     auth_str = f"{client_id}:{client_secret}"
     auth_bytes = auth_str.encode("utf-8")

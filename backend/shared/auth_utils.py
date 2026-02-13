@@ -46,7 +46,12 @@ def verify_jwt(token):
         if token.startswith("Bearer "):
             token = token[BEARER_PREFIX_LEN:]
 
-        payload = jwt.decode(token, get_secret("JWT_SECRET"), algorithms=[JWT_ALGORITHM])
+        secret = get_secret("JWT_SECRET")
+        if not secret:
+            print(f"Failed to generate token: missing configuration")
+            return None
+
+        payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         print("Token expired")

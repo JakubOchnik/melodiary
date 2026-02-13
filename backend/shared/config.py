@@ -35,7 +35,14 @@ def get_secret(name):
 
     client = _get_ssm_client()
     param_path = f"{SSM_PREFIX}/{name}"
-    response = client.get_parameter(Name=param_path, WithDecryption=True)
+    try:
+        response = client.get_parameter(Name=param_path, WithDecryption=True)
+    except client.exceptions.ParameterNotFound:
+        print(f"SSM parameter not found: {param_path}")
+        return None
+    except Exception as e:
+        print(f"Failed to fetch SSM parameter {param_path}: {e}")
+        return None
     value = response["Parameter"]["Value"]
     _cache[name] = value
     return value
