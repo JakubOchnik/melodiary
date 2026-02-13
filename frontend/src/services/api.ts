@@ -11,6 +11,7 @@ import type {
   LibraryQueryParams,
   Playlist,
   UserPreferences,
+  SyncPlatformResponse,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -90,8 +91,8 @@ class ApiService {
       await this.client.delete(`/library/${trackId}`);
     },
 
-    syncPlatform: async (platform: string): Promise<{ synced: number }> => {
-      const response = await this.client.post<{ synced: number }>(`/library/sync/${platform}`);
+    syncPlatform: async (platform: string): Promise<SyncPlatformResponse> => {
+      const response = await this.client.post<SyncPlatformResponse>(`/library/sync/${platform}`);
       return response.data;
     },
   };

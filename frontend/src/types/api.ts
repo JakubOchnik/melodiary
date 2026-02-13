@@ -39,3 +39,9 @@ export interface LibraryQueryParams {
   sortBy?: 'addedDate' | 'trackName' | 'artistName';
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface SyncPlatformResponse {
+  synced: number;
+  malformed: number;
+  message: string;
+}
