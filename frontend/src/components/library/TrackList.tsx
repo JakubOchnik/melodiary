@@ -13,6 +13,11 @@ export const TrackList: React.FC<TrackListProps> = ({ refreshKey }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDelete = useCallback(async (trackId: string) => {
+    await api.library.deleteTrack(trackId);
+    setTracks((prev) => prev.filter((t) => t.trackId !== trackId));
+  }, []);
+
   const fetchTracks = useCallback(async (cursor?: Record<string, string> | null) => {
     setLoading(true);
     setError(null);
@@ -64,7 +69,7 @@ export const TrackList: React.FC<TrackListProps> = ({ refreshKey }) => {
       {tracks.length > 0 && (
         <ul className="divide-y divide-gray-100">
           {tracks.map((track) => (
-            <TrackItem key={track.trackId} track={track} />
+            <TrackItem key={track.trackId} track={track} onDelete={handleDelete} />
           ))}
         </ul>
       )}
