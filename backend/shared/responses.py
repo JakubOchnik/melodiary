@@ -1,4 +1,14 @@
 import json
+from decimal import Decimal
+
+
+class DecimalEncoder(json.JSONEncoder):
+    """Handles DynamoDB Decimal types during JSON serialization."""
+
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return int(o) if o == int(o) else float(o)
+        return super().default(o)
 
 STANDARD_CORS_HEADERS = {
     "Content-Type": "application/json",
@@ -17,7 +27,7 @@ def success_response(data, status_code=200):
     return create_response(
         status_code,
         get_standard_cors_headers(),
-        json.dumps(data) if not isinstance(data, str) else data,
+        json.dumps(data, cls=DecimalEncoder) if not isinstance(data, str) else data,
     )
 
 
@@ -28,7 +38,7 @@ def error_response(message, status_code=400, details=None):
         error_body["details"] = details
 
     return create_response(
-        status_code, get_standard_cors_headers(), json.dumps(error_body)
+        status_code, get_standard_cors_headers(), json.dumps(error_body, cls=DecimalEncoder)
     )
 
 
