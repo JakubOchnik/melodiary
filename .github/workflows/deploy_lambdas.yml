@@ -42,12 +42,12 @@ jobs:
       function_name: melodiary-fetch-spotify-library
     secrets: inherit
 
-  deploy-get-library-lambda:
+  deploy-library-lambda:
     uses: ./.github/workflows/deploy_lambda_with_dependencies.yml
     with:
-      handler: get_library.lambda_handler
-      requirements_path: lambda/service/get_library_requirements.txt
+      handler: library.lambda_handler
+      requirements_path: lambda/service/library_requirements.txt
       shared_modules_path: shared
-      lambda_code_path: lambda/service/get_library.py
-      function_name: melodiary-get-library
+      lambda_code_path: lambda/service/library.py
+      function_name: melodiary-library
     secrets: inherit
