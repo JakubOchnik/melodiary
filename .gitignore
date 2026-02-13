@@ -47,3 +47,6 @@ Thumbs.db
 # Deployment
 *.zip
 lambda_package/
+
+# AI
+.claude/
