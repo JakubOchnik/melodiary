@@ -11,7 +11,8 @@ on:
         required: true
         type: string
       requirements_path:
-        required: true
+        required: false
+        default: ""
         type: string
       shared_modules_path:
         required: true
@@ -55,8 +56,10 @@ jobs:
           mkdir -p lambda_package
           cd lambda_package
 
-          echo "Installing dependencies..."
-          pip install -r ../${REQUIREMENTS_PATH} -t .
+          if [ -n "${REQUIREMENTS_PATH}" ]; then
+            echo "Installing dependencies..."
+            pip install -r ../${REQUIREMENTS_PATH} -t .
+          fi
 
           echo "Copying Lambda function..."
           cp ../${LAMBDA_CODE_PATH} .

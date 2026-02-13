@@ -14,23 +14,13 @@ permissions:
 
 jobs:
   deploy-spotify-login-lambda:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to AWS
-        uses: aws-actions/aws-lambda-deploy@v1.1.0
-        with:
-          function-name: melodiary-spotify-login
-          code-artifacts-dir: ./backend/lambda/auth
-          handler: spotify_login.lambda_handler
-          runtime: python3.14
+    uses: ./.github/workflows/deploy_lambda_with_dependencies.yml
+    with:
+      handler: spotify_login.lambda_handler
+      shared_modules_path: shared
+      lambda_code_path: lambda/auth/spotify_login.py
+      function_name: melodiary-spotify-login
+    secrets: inherit
 
   deploy-spotify-login-callback-lambda:
     uses: ./.github/workflows/deploy_lambda_with_dependencies.yml
