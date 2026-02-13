@@ -3,7 +3,9 @@ import os
 import base64
 from datetime import datetime, timedelta, timezone
 
-from shared.config import get_secret
+from shared.config import get_secret, get_logger
+
+logger = get_logger(__name__)
 
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
@@ -182,7 +184,7 @@ def parse_track(track):
             ),
         }
     except (KeyError, IndexError) as fmt_error:
-        print(f"Skipping malformed track: {fmt_error}")
+        logger.warning("Skipping malformed track: %s", fmt_error)
     return None
 
 
@@ -222,7 +224,7 @@ def get_user_saved_tracks(access_token, limit=50):
                 break
 
             offset += limit
-            print(f"Fetched {len(all_tracks)} tracks so far...")
+            logger.info("Fetched %d tracks so far...", len(all_tracks))
         return all_tracks, None
     except requests.exceptions.RequestException as e:
         return [], f"Failed to get saved tracks: {str(e)}"

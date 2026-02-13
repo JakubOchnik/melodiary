@@ -1,7 +1,9 @@
 import jwt
 from datetime import datetime, timedelta, timezone
 
-from shared.config import get_secret
+from shared.config import get_secret, get_logger
+
+logger = get_logger(__name__)
 
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_DAYS = 30
@@ -48,16 +50,16 @@ def verify_jwt(token):
 
         secret = get_secret("JWT_SECRET")
         if not secret:
-            print(f"Failed to generate token: missing configuration")
+            logger.error("Failed to verify token: missing JWT_SECRET configuration")
             return None
 
         payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
-        print("Token expired")
+        logger.info("Token expired")
         return None
     except jwt.InvalidTokenError as e:
-        print(f"Invalid token: {e}")
+        logger.warning("Invalid token: %s", e)
         return None
 
 

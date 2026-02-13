@@ -1,5 +1,8 @@
+from shared.config import get_logger
 from shared.responses import success_response, error_response
 from shared.auth_utils import require_auth
+
+logger = get_logger(__name__)
 from shared.db import get_platform_connection, save_tracks, update_platform_tokens
 from shared.spotify_utils import (
     is_token_expired,
@@ -30,21 +33,21 @@ def lambda_handler(event, context):
 
         access_token = connection["accessToken"]
         if is_token_expired(connection.get("expiresAt", "")):
-            print(f"Token expired for user {user_id}, refreshing...")
+            logger.info("Token expired for user %s, refreshing...", user_id)
             new_tokens, error = refresh_access_token(connection["refreshToken"])
 
             if error:
-                print(f"Token refresh failed for user {user_id}: {error}")
+                logger.error("Token refresh failed for user %s: %s", user_id, error)
                 return error_response("Failed to refresh Spotify token", 401)
 
             update_platform_tokens(user_id, "spotify", new_tokens)
             access_token = new_tokens["access_token"]
 
-        print(f"Fetching saved tracks for user {user_id}...")
+        logger.info("Fetching saved tracks for user %s...", user_id)
         tracks, error = get_user_saved_tracks(access_token)
 
         if error:
-            print(f"Track fetch failed for user {user_id}: {error}")
+            logger.error("Track fetch failed for user %s: %s", user_id, error)
             return error_response("Failed to fetch tracks", 500)
 
         if not tracks:
@@ -61,7 +64,7 @@ def lambda_handler(event, context):
             else:
                 malformed_track_count += 1
 
-        print(f"Saving {len(formatted_tracks)} tracks to DB...")
+        logger.info("Saving %d tracks to DB...", len(formatted_tracks))
         saved_count = save_tracks(user_id, formatted_tracks)
 
         return success_response(
@@ -72,5 +75,5 @@ def lambda_handler(event, context):
             }
         )
     except Exception as e:
-        print(f"Error fetching library: {str(e)}")
+        logger.error("Error fetching library: %s", e)
         return error_response("Failed to sync library", 500)

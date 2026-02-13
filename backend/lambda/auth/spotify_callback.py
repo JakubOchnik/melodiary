@@ -1,6 +1,9 @@
 import json
 
+from shared.config import get_logger
 from shared.responses import success_response, error_response
+
+logger = get_logger(__name__)
 from shared.spotify_utils import exchange_code_for_tokens, get_user_profile
 from shared.auth_utils import generate_jwt
 from shared.db import (
@@ -75,9 +78,9 @@ def lambda_handler(event, context):
             spotify_id=spotify_id,
             has_real_email=bool(spotify_email),
         )
-        print(f"Created new user: {user['userId']} (Spotify ID: {spotify_id})")
+        logger.info("Created new user: %s (Spotify ID: %s)", user["userId"], spotify_id)
     else:
-        print(f"Existing user logged in: {user['userId']} (Spotify ID: {spotify_id})")
+        logger.info("Existing user logged in: %s (Spotify ID: %s)", user["userId"], spotify_id)
 
     save_platform_connection(
         user_id=user["userId"], platform="spotify", tokens=tokens, profile_data=profile
