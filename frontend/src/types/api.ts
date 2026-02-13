@@ -12,10 +12,8 @@ export interface ApiError {
 
 export interface PaginatedResponse<T> {
   items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
+  count: number;
+  lastKey: Record<string, string> | null;
 }
 
 export interface SpotifyAuthUrlResponse {
@@ -32,12 +30,8 @@ export interface AuthCallbackResponse {
 }
 
 export interface LibraryQueryParams {
-  page?: number;
-  pageSize?: number;
-  platform?: string;
-  search?: string;
-  sortBy?: 'addedDate' | 'trackName' | 'artistName';
-  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  lastKey?: string;
 }
 
 export interface SyncPlatformResponse {

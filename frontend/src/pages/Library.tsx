@@ -3,24 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { authManager } from '../services/auth';
 import api from '../services/api';
 import type { SyncPlatformResponse } from '../types';
+import { TrackList } from '../components/library/TrackList';
 
 export const Library: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ userId: string; email: string } | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncPlatformResponse | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const auth = authManager.getAuthState();
     if (!auth.isAuthenticated) {
       navigate('/login');
     }
-
-    setUser({
-      userId: auth.userId || 'unknown',
-      email: 'Loading...',
-    });
   }, [navigate]);
 
   const handleLogout = () => {
@@ -36,7 +32,7 @@ export const Library: React.FC = () => {
     try {
       const result = await api.library.syncPlatform('spotify');
       setSyncResult(result);
-      // TODO: Refresh library/track list after successful sync
+      setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sync library';
       setSyncError(message);
@@ -64,13 +60,6 @@ export const Library: React.FC = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Welcome Message */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Library</h2>
-            <p className="text-gray-600">Sync your Spotify library to get started.</p>
-            {user && <p className="text-sm text-gray-500 mt-2">User ID: {user.userId}</p>}
-          </div>
-
           {/* Sync Section */}
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -90,7 +79,6 @@ export const Library: React.FC = () => {
               </button>
             </div>
 
-            {/* Sync Result */}
             {syncResult && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 font-medium">{syncResult.message}</p>
@@ -102,7 +90,6 @@ export const Library: React.FC = () => {
               </div>
             )}
 
-            {/* Sync Error */}
             {syncError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-red-800 font-medium">Sync failed</p>
@@ -111,10 +98,7 @@ export const Library: React.FC = () => {
             )}
           </div>
 
-          {/* Placeholder for track list */}
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-400">
-            <p>Track list will appear here after syncing. (TODO)</p>
-          </div>
+          <TrackList refreshKey={refreshKey} />
         </div>
       </main>
     </div>
