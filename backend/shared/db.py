@@ -197,9 +197,35 @@ def update_platform_tokens(user_id, platform, tokens):
     )
 
 
+def soft_delete_track(user_id, track_id):
+    """
+    Soft-delete a track by setting deletedAt timestamp.
+
+    Args:
+        user_id: User ID
+        track_id: Track ID
+
+    Returns:
+        True if the track existed and was deleted, False otherwise
+    """
+    try:
+        library_table.update_item(
+            Key={"userId": user_id, "trackId": track_id},
+            UpdateExpression="SET deletedAt = :deletedAt",
+            ConditionExpression="attribute_exists(trackId) AND attribute_not_exists(deletedAt)",
+            ExpressionAttributeValues={
+                ":deletedAt": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+        return True
+    except dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
+        return False
+
+
 def save_tracks(user_id, tracks):
     """
-    Batch save tracks to user library
+    Batch save tracks to user library.
+    Skips tracks that have been soft-deleted by the user.
 
     Args:
         user_id: User ID
@@ -208,8 +234,27 @@ def save_tracks(user_id, tracks):
     Returns:
         Number of saved tracks
     """
+    # Query all soft-deleted tracks for this user in one go
+    deleted_track_ids = set()
+    query_kwargs = {
+        "KeyConditionExpression": "userId = :userId",
+        "FilterExpression": "attribute_exists(deletedAt)",
+        "ExpressionAttributeValues": {":userId": user_id},
+        "ProjectionExpression": "trackId",
+    }
+    while True:
+        response = library_table.query(**query_kwargs)
+        for item in response.get("Items", []):
+            deleted_track_ids.add(item["trackId"])
+        if "LastEvaluatedKey" not in response:
+            break
+        query_kwargs["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+
+    saved_count = 0
     with library_table.batch_writer() as batch:
         for track in tracks:
+            if track["trackId"] in deleted_track_ids:
+                continue
             batch.put_item(
                 Item={
                     "userId": user_id,
@@ -230,8 +275,9 @@ def save_tracks(user_id, tracks):
                     "isManual": track.get("isManual", False),
                 }
             )
+            saved_count += 1
 
-    return len(tracks)
+    return saved_count
 
 
 def get_user_library(user_id, limit=50, last_key=None):
@@ -249,6 +295,7 @@ def get_user_library(user_id, limit=50, last_key=None):
 
     query_params = {
         "KeyConditionExpression": "userId = :userId",
+        "FilterExpression": "attribute_not_exists(deletedAt)",
         "ExpressionAttributeValues": {":userId": user_id},
         "Limit": limit,
         "ScanIndexForward": False,
