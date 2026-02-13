@@ -1,8 +1,11 @@
 import json
 
+from shared.config import get_logger
 from shared.responses import success_response, error_response
 from shared.auth_utils import require_auth
 from shared.db import get_user_library
+
+logger = get_logger(__name__)
 
 
 @require_auth
@@ -37,7 +40,7 @@ def lambda_handler(event, context):
     try:
         result = get_user_library(user_id, limit=limit, last_key=last_key)
     except Exception as e:
-        print(f"Failed to retrieve library for user {user_id}: {str(e)}")
+        logger.error("Failed to retrieve library for user %s: %s", user_id, e)
         return error_response("Failed to retrieve library", 500)
 
     return success_response(
