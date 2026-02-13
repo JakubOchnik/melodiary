@@ -88,7 +88,7 @@ class ApiService {
     },
 
     deleteTrack: async (trackId: string): Promise<void> => {
-      await this.client.delete(`/library/${trackId}`);
+      await this.client.delete(`/library/${encodeURIComponent(trackId)}`);
     },
 
     syncPlatform: async (platform: string): Promise<SyncPlatformResponse> => {
