@@ -49,5 +49,5 @@ jobs:
       requirements_path: lambda/service/library_requirements.txt
       shared_modules_path: shared
       lambda_code_path: lambda/service/library.py
-      function_name: melodiary-library
+      function_name: melodiary-get-library
     secrets: inherit
